@@ -36,8 +36,8 @@ public class Wall implements Structure {
 		this.blocks = blocks;
 	}	
 
-	/* Musze uzyc metody findBlockByColor rekursywnie, ¿eby zaadresowaæ problem z zagniezdzonymi blokami zlozonymi, 
-	jednak zgodnie z interfejsem metoda nie mo¿e przyjmowaæ argumentow innych ni¿ String material, 
+	/* Musze uzyc metody findBlockByColor rekursywnie, zeby zaadresowaæ problem z zagniezdzonymi blokami zlozonymi, 
+	jednak zgodnie z interfejsem metoda nie moze przyjmowac argumentow innych niz String material, 
 	tak wiec uzywam metody pomocniczej recursiveFindBlocksByMaterial() przyjmujacej poza stringiem rowniez liste blokow */
 	public Optional<Block> findBlockByColor(String color) {
 		return recursiveFindBlockByColor(blocks, color);
@@ -48,7 +48,7 @@ public class Wall implements Structure {
 			return Optional.empty(); //zabezpieczamy przed przekazaniem nulla jako argument
 		}
         for (Block block : blocks) {
-        	/* dla wszystkich blokow w liscie sprawdzam kolor uzywaj¹c metody equalsIgnoreCase, 
+        	/* dla wszystkich blokow w liscie sprawdzam kolor uzywajac metody equalsIgnoreCase, 
         	celem pominiecia sprawdzania wielkosci znaków w stringu */
         	if (color.equalsIgnoreCase(block.getColor())) {
         		return Optional.of(block);
@@ -66,8 +66,8 @@ public class Wall implements Structure {
         //jesli petla nie znajdzie bloku o danym kolorze, zwracana jest pusta instancja Optional
         }
 	
-	/* Musze uzyc metody findBlocksByMaterial rekursywnie, ¿eby zaadresowac problem z zagniezdzonymi blokami zlozonymi, 
-	jednak zgodnie z interfejsem metoda nie mo¿e przyjmowac argumentow innych ni¿ String material, 
+	/* Musze uzyc metody findBlocksByMaterial rekursywnie, zeby zaadresowac problem z zagniezdzonymi blokami zlozonymi, 
+	jednak zgodnie z interfejsem metoda nie moze przyjmowac argumentow innych niz String material, 
 	tak wiec uzywam metody pomocniczej recursiveFindBlocksByMaterial() przyjmujacej oprocz stringa rowniez liste blokow  */	
 	public List<Block> findBlocksByMaterial(String material) {
 		return recursiveFindBlocksByMaterial(blocks, material);
@@ -94,8 +94,8 @@ public class Wall implements Structure {
 		//zwracam liste wszystkich blokow o podanym kolorze, zarowno tych z pojedynczych blokow, jak i tych zlozonych
 		}
 	
-		/* Musze uzyc metody count rekursywnie, ¿eby zaadresowac problem z zagniezdzonymi blokami zlozonymi, 
-		jednak zgodnie z interfejsem metoda count nie mo¿e przyjmowaæ argumentów, tak wiêc u¿ywam metody pomocniczej recursiveCount(),
+		/* Musze uzyc metody count rekursywnie, zeby zaadresowac problem z zagniezdzonymi blokami zlozonymi, 
+		jednak zgodnie z interfejsem metoda count nie moze przyjmowaæ argumentow, tak wiêc uzywam metody pomocniczej recursiveCount(),
 		ktora przyjmuje liste bloków */
 		public int count() {
 			return recursiveCount(blocks);
@@ -103,9 +103,10 @@ public class Wall implements Structure {
 
 		private int recursiveCount(List<Block> blocks) {		
 			int blockCount = 0, compositeBlockFragmentCount = 0;
-			/* zakladam, ¿e przez wszystkie elementy rozumiemy pojedyncze bloki, równie¿ te które skladaj¹ sie na bloki zlozone,
-			tak wiêc uzyje logiki podobnej jak w poprzednich metodach, zliczajac zarowno pojedyncze bloki, jak i skladowe blokow zlozonych, 
-			jesli jako element rozumiemy block LUB blok zlozony, prawdopodobnie wystarczyloby zwrocic blocks.size() */
+			/* zakladam, ze przez wszystkie elementy rozumiemy pojedyncze bloki, rowniez te ktore skladaja sie na bloki zlozone,
+			tak wiec uzywam logiki podobnej jak w poprzednich metodach, zliczajac zarowno pojedyncze bloki, jak i skladowe blokow zlozonych, 
+			jesli jako element rozumiemy blok LUB blok zlozony, prawdopodobnie wystarczyloby zwrocic blocks.size(), */
+			
 			for (Block block : blocks) {			
 				if (block instanceof CompositeBlock) {
 					compositeBlockFragmentCount += recursiveCount(((CompositeBlock) block).getBlocks());
