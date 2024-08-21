@@ -8,29 +8,37 @@ interface Structure {
 	Optional<Block> findBlockByColor(String color);
 	// zwraca wszystkie elementy z danego materia³u
 	List<Block> findBlocksByMaterial(String material);
-	//zwraca liczbê wszystkich elementów tworz¹cych strukturê
+	//zwraca liczbe wszystkich elementow tworzacych strukture
 	int count();
 }
 
+/*interfejs zaimplementowany w klasie BlockClass, settery poza scope zadania, tak wiec klasa posiada tylko konstruktor i gettery
+  (do testow) */
 interface Block {
 	String getColor();
 	String getMaterial();
 }
 
+/*interfejs zaimplementowany w klasie CompositeBlockClass, settery poza scope zadania, tak wiec klasa posiada tylko konstruktor i gettery
+ (do testow), jako ze interfejs CompositeBlock dziedziczy z interfejsu Block, 
+ otrzymal rowniez gettery getColor() oraz getMaterial(), zwracajace statyczna wartosc */
 interface CompositeBlock extends Block {
 	List<Block> getBlocks();
 }
 
+
+
 public class Wall implements Structure {
 	private List<Block> blocks;	
 	
+	//Definiuje konstruktor do klasy wall (do testow)
 	public Wall(List<Block> blocks) {
 		this.blocks = blocks;
 	}	
 
-	/* Musimy u¿yc metody findBlockByColor rekursywnie, ¿eby zaadresowaæ problem z zagniezdzonymi blokami zlozonymi, 
-	jednak zgodnie z interfejsem metoda nie mo¿e przyjmowaæ argumentów innych ni¿ String material, 
-	tak wiêc u¿ywam metody pomocniczej recursiveFindBlocksByMaterial */
+	/* Musze uzyc metody findBlockByColor rekursywnie, ¿eby zaadresowaæ problem z zagniezdzonymi blokami zlozonymi, 
+	jednak zgodnie z interfejsem metoda nie mo¿e przyjmowaæ argumentow innych ni¿ String material, 
+	tak wiec uzywam metody pomocniczej recursiveFindBlocksByMaterial() przyjmujacej poza stringiem rowniez liste blokow */
 	public Optional<Block> findBlockByColor(String color) {
 		return recursiveFindBlockByColor(blocks, color);
 	}	
@@ -40,11 +48,11 @@ public class Wall implements Structure {
 			return Optional.empty(); //zabezpieczamy przed przekazaniem nulla jako argument
 		}
         for (Block block : blocks) {
-        	/* dla wszystkich bloków w liœcie sprawdzamy kolor u¿ywaj¹c metody equalsIgnoreCase, 
-        	celem pominiêcie sprawdzania wielkoœci znaków w stringu */
+        	/* dla wszystkich blokow w liscie sprawdzam kolor uzywaj¹c metody equalsIgnoreCase, 
+        	celem pominiecia sprawdzania wielkosci znaków w stringu */
         	if (color.equalsIgnoreCase(block.getColor())) {
         		return Optional.of(block);
-        		//zwracamy pierwszy blok o danym kolorze
+        		//zwraca pierwszy blok o danym kolorze
         	}
         	
         	if (block instanceof CompositeBlock) {
@@ -55,12 +63,12 @@ public class Wall implements Structure {
         	}
         }
         return Optional.empty();
-        //jak w pêtli nie znajdziemy bloku o danym kolorze, zwracamy pust¹ instancjê Optional
+        //jesli petla nie znajdzie bloku o danym kolorze, zwracana jest pusta instancja Optional
         }
 	
-	/* Musimy u¿yc metody findBlocksByMaterial rekursywnie, ¿eby zaadresowaæ problem z zagniezdzonymi blokami zlozonymi, 
-	jednak zgodnie z interfejsem metoda nie mo¿e przyjmowaæ argumentów innych ni¿ String material, 
-	tak wiêc u¿ywam metody pomocniczej recursiveFindBlocksByMaterial */	
+	/* Musze uzyc metody findBlocksByMaterial rekursywnie, ¿eby zaadresowac problem z zagniezdzonymi blokami zlozonymi, 
+	jednak zgodnie z interfejsem metoda nie mo¿e przyjmowac argumentow innych ni¿ String material, 
+	tak wiec uzywam metody pomocniczej recursiveFindBlocksByMaterial() przyjmujacej oprocz stringa rowniez liste blokow  */	
 	public List<Block> findBlocksByMaterial(String material) {
 		return recursiveFindBlocksByMaterial(blocks, material);
 	}
@@ -71,32 +79,33 @@ public class Wall implements Structure {
 		}
 		List<Block> foundBlocks = new ArrayList<>();
 		for (Block block :blocks) {
-			//przeszukujemy listê bloków w poszukiwaniu bloków z danego materia³u, znalezione dodajemy to listy foundBlocks
+			//przeszukuje liste blokow w poszukiwaniu blokow z danego materialu, znalezione dodaje to listy foundBlocks
 			if (material.equalsIgnoreCase(block.getMaterial())) {
 				foundBlocks.add(block);
 			}			
 			if (block instanceof CompositeBlock) {
-				/* sprawdzamy czy blok jest instancj¹ CompositeBlock, jeœli jest, 
-				to rekursywnie wywo³ujemy metodê recursiveFinfBlocksByMaterial */					
+				/* sprawdzam czy blok jest instancja CompositeBlock, jesli tak, 
+				to rekursywnie wywoluje metode recursiveFinfBlocksByMaterial() */					
 					foundBlocks.addAll(recursiveFindBlocksByMaterial(((CompositeBlock) block).getBlocks(), material));									
 				}
 			}
 		
 		return foundBlocks;
-		//zwracamy listê wszystkich bloków o podanym kolorze, zarówno tych z pojedynczych bloków, jak i tych z³o¿onych
+		//zwracam liste wszystkich blokow o podanym kolorze, zarowno tych z pojedynczych blokow, jak i tych zlozonych
 		}
 	
-		/* Musimy u¿yc metody count rekursywnie, ¿eby zaadresowaæ problem z zagniezdzonymi blokami zlozonymi, 
-		jednak zgodnie z interfejsem metoda count nie mo¿e przyjmowaæ argumentów, tak wiêc u¿ywam metody pomocniczej recursiveCount */
+		/* Musze uzyc metody count rekursywnie, ¿eby zaadresowac problem z zagniezdzonymi blokami zlozonymi, 
+		jednak zgodnie z interfejsem metoda count nie mo¿e przyjmowaæ argumentów, tak wiêc u¿ywam metody pomocniczej recursiveCount(),
+		ktora przyjmuje liste bloków */
 		public int count() {
 			return recursiveCount(blocks);
 		}
 
 		private int recursiveCount(List<Block> blocks) {		
 			int blockCount = 0, compositeBlockFragmentCount = 0;
-			/* zak³adam, ¿e przez wszystkie elementy rozumiemy pojedyncze bloki, równie¿ te które sk³adaj¹ siê na bloki z³o¿one,
-			tak wiêc u¿yjê logiki podobnej jak w poprzednich metodach, zliczaj¹c zarówno pojedyncze bloki, jak i sk³adowe bloków z³o¿onych, 
-			jeœli jako element rozumiemy block LUB blok z³o¿ony, prawdopodobnie wystarczy³oby zwróciæ blocks.size() */
+			/* zakladam, ¿e przez wszystkie elementy rozumiemy pojedyncze bloki, równie¿ te które skladaj¹ sie na bloki zlozone,
+			tak wiêc uzyje logiki podobnej jak w poprzednich metodach, zliczajac zarowno pojedyncze bloki, jak i skladowe blokow zlozonych, 
+			jesli jako element rozumiemy block LUB blok zlozony, prawdopodobnie wystarczyloby zwrocic blocks.size() */
 			for (Block block : blocks) {			
 				if (block instanceof CompositeBlock) {
 					compositeBlockFragmentCount += recursiveCount(((CompositeBlock) block).getBlocks());
