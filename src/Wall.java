@@ -21,7 +21,7 @@ interface Block {
 
 /*interfejs zaimplementowany w klasie CompositeBlockClass, settery poza scope zadania, tak wiec klasa posiada tylko konstruktor i gettery
  (do testow), jako ze interfejs CompositeBlock dziedziczy z interfejsu Block, 
- otrzymal rowniez gettery getColor() oraz getMaterial(), zwracajace statyczna wartosc */
+ klasa otrzymala rowniez gettery getColor() oraz getMaterial(), zwracajace statyczna wartosc */
 interface CompositeBlock extends Block {
 	List<Block> getBlocks();
 }
