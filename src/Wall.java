@@ -44,7 +44,7 @@ public class Wall implements Structure {
 	}	
 	
 	private Optional<Block> recursiveFindBlockByColor(List<Block> blocks, String color) {
-		if (color == null) {
+		if (color == null || blocks == null) {
 			return Optional.empty(); //zabezpieczamy przed przekazaniem nulla jako argument
 		}
         for (Block block : blocks) {
@@ -74,7 +74,7 @@ public class Wall implements Structure {
 	}
         
 	private List<Block> recursiveFindBlocksByMaterial(List<Block> blocks, String material){
-		if (material == null) {
+		if (material == null || blocks == null) {
 			return new ArrayList<>();
 		}
 		List<Block> foundBlocks = new ArrayList<>();
@@ -101,7 +101,10 @@ public class Wall implements Structure {
 			return recursiveCount(blocks);
 		}
 
-		private int recursiveCount(List<Block> blocks) {		
+		private int recursiveCount(List<Block> blocks) {
+			if (blocks == null) { //zabezpieczamy przed nullem przekazanym jako lista blokow, nie psujac jednoczesnie rekursji
+				return 0;
+			}
 			int blockCount = 0, compositeBlockFragmentCount = 0;
 			/* zakladam, ze przez wszystkie elementy rozumiemy pojedyncze bloki, rowniez te ktore skladaja sie na bloki zlozone,
 			tak wiec uzywam logiki podobnej jak w poprzednich metodach, zliczajac zarowno pojedyncze bloki, jak i skladowe blokow zlozonych, 
