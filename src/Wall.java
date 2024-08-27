@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 interface Structure {
 	// zwraca dowolny element o podanym kolorze
@@ -45,25 +47,16 @@ public class Wall implements Structure {
 	
 	private Optional<Block> recursiveFindBlockByColor(List<Block> blocks, String color) {
 		if (color == null || blocks == null) {
-			return Optional.empty(); //zabezpieczamy przed przekazaniem nulla jako argument
+			return Optional.empty(); //zabezpieczam przed przekazaniem nulla jako argument
 		}
-        for (Block block : blocks) {
-        	/* dla wszystkich blokow w liscie sprawdzam kolor uzywajac metody equalsIgnoreCase, 
-        	celem pominiecia sprawdzania wielkosci znaków w stringu */
-        	if (color.equalsIgnoreCase(block.getColor())) {
-        		return Optional.of(block);
-        		//zwraca pierwszy blok o danym kolorze
-        	}
-        	
-        	if (block instanceof CompositeBlock) {
-        		Optional<Block> nestedBlock = recursiveFindBlockByColor(((CompositeBlock) block).getBlocks(), color);
-        		if (nestedBlock.isPresent()) {
-        			return nestedBlock;
-        		}
-        	}
-        }
-        return Optional.empty();
-        //jesli petla nie znajdzie bloku o danym kolorze, zwracana jest pusta instancja Optional
+		/* tworze strumien z listy blokow, strumien "trzyma" w sobie tylko bloki o podanym kolorze i zwraca pierwszy znaleziony
+		 lub Optional.empty() jesli nie ma zadnego
+		 w przypadku blokow zlozonych dzieki rekursji w strumieniu laduje lista blokow skladowych 
+		 (lub pusty strumien, jesli w skladowych nie ma bloku o podanym kolorze) */
+			return blocks.stream()
+					.flatMap(block -> block instanceof CompositeBlock ? recursiveFindBlockByColor(((CompositeBlock) block).getBlocks(), color).stream() : Stream.of(block))
+					.filter(block -> color.equalsIgnoreCase(block.getColor()))
+					.findFirst();
         }
 	
 	/* Musze uzyc metody findBlocksByMaterial rekursywnie, zeby zaadresowac problem z zagniezdzonymi blokami zlozonymi, 
@@ -75,23 +68,14 @@ public class Wall implements Structure {
         
 	private List<Block> recursiveFindBlocksByMaterial(List<Block> blocks, String material){
 		if (material == null || blocks == null) {
-			return new ArrayList<>();
+			return new ArrayList<>(); //zabezpieczam przed przekazaniem nulla jako argument
 		}
-		List<Block> foundBlocks = new ArrayList<>();
-		for (Block block :blocks) {
-			//przeszukuje liste blokow w poszukiwaniu blokow z danego materialu, znalezione dodaje to listy foundBlocks
-			if (material.equalsIgnoreCase(block.getMaterial())) {
-				foundBlocks.add(block);
-			}			
-			if (block instanceof CompositeBlock) {
-				/* sprawdzam czy blok jest instancja CompositeBlock, jesli tak, 
-				to rekursywnie wywoluje metode recursiveFinfBlocksByMaterial() */					
-					foundBlocks.addAll(recursiveFindBlocksByMaterial(((CompositeBlock) block).getBlocks(), material));									
-				}
-			}
-		
-		return foundBlocks;
-		//zwracam liste wszystkich blokow o podanym kolorze, zarowno tych z pojedynczych blokow, jak i tych zlozonych
+		/* tworze strumien z listy blokow, strumien "trzyma" w sobie tylko bloki z podanego materialu i zbiera je do listy, 
+		  w przypadku blokow zlozonych sumowany jest blok zlozony, jak rowniez suma blokow skladowych pochodzaca z rekursji */
+			return blocks.stream()
+					.flatMap(block -> block instanceof CompositeBlock ? Stream.concat(Stream.of(block), recursiveFindBlocksByMaterial(((CompositeBlock) block).getBlocks(), material).stream()) : Stream.of(block))
+					.filter(block -> material.equalsIgnoreCase(block.getMaterial()))
+					.collect(Collectors.toList());
 		}
 	
 		/* Musze uzyc metody count rekursywnie, zeby zaadresowac problem z zagniezdzonymi blokami zlozonymi, 
@@ -105,20 +89,11 @@ public class Wall implements Structure {
 			if (blocks == null) { //zabezpieczamy przed nullem przekazanym jako lista blokow, nie psujac jednoczesnie rekursji
 				return 0;
 			}
-			int blockCount = 0, compositeBlockFragmentCount = 0;
-			/* zakladam, ze przez wszystkie elementy rozumiemy pojedyncze bloki, rowniez te ktore skladaja sie na bloki zlozone,
-			tak wiec uzywam logiki podobnej jak w poprzednich metodach, zliczajac zarowno pojedyncze bloki, jak i skladowe blokow zlozonych, 
-			jesli jako element rozumiemy blok LUB blok zlozony, prawdopodobnie wystarczyloby zwrocic blocks.size(), */
-			
-			for (Block block : blocks) {			
-				if (block instanceof CompositeBlock) {
-					compositeBlockFragmentCount += recursiveCount(((CompositeBlock) block).getBlocks());
-				} else if (block instanceof Block) {
-					blockCount++;
-				}
-			}
-			blockCount += compositeBlockFragmentCount;
-			return blockCount;
+			/*tworze strumien z listy blokow, konwertuje je z Block do int, w przypadku bloku zlozonego, licze jego skladowe
+			 * rekursywnym wywolaniem metody, w przypadku bloku pojedynczego licze go jako 1, wszytkie integery sa sumowane */
+			return blocks.stream()
+					.mapToInt(block -> block instanceof CompositeBlock ? recursiveCount(((CompositeBlock) block).getBlocks()) : 1)
+					.sum();
 		}
 }
 
